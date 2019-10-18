@@ -29,6 +29,7 @@
 
     div {
       flex: 1;
+      max-width: 1rem;
       border-left: 1px solid #eee;
 
       span {
@@ -40,6 +41,15 @@
 
         &.visited {
           background-color: blue;
+        }
+        &.shortest-path {
+          background-color: green;
+        }
+        &.start {
+          background-color: yellow;
+        }
+        &.end {
+          background-color: red;
         }
         &.wall {
           background-color: black;

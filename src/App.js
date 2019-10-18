@@ -1,27 +1,35 @@
 import React from 'react';
-import cs from 'clsx';
+
 import './App.scss';
+import Cell from './components/Cell';
+import breadthFirstSearch, { getShortestPath } from './algorithms/bfs';
+import { newBoard } from './util';
 
-const ROWS = 20;
-const COLS = 50;
-const WALL = 2;
-const BOARD = [...Array(ROWS)].map(() => [...Array(COLS)].map(() => 0));
-const VISITED = [...Array(ROWS)].map(() => [...Array(COLS)].map(() => false));
+const NUM_OF_ROWS = 20;
+const NUM_OF_COLS = 20;
 
-BOARD[12][10] = WALL;
-BOARD[11][10] = WALL;
-BOARD[10][8] = WALL;
+const START_COORDS = {
+  x: Math.floor(Math.random() * NUM_OF_ROWS),
+  y: Math.floor(Math.random() * NUM_OF_COLS)
+};
 
-class Node extends React.PureComponent {
-  render() {
-    const { visited, value, ...props } = this.props;
-    return (
-      <div {...props}>
-        <span className={cs({ visited, wall: value === WALL })}></span>
-      </div>
-    );
-  }
-}
+const END_COORDS = {
+  x: Math.floor(Math.random() * NUM_OF_ROWS),
+  y: Math.floor(Math.random() * NUM_OF_COLS)
+};
+
+const BOARD = newBoard(NUM_OF_ROWS, NUM_OF_COLS);
+const VISITED = newBoard(NUM_OF_ROWS, NUM_OF_COLS, false);
+
+BOARD[5][11].isWall = true;
+BOARD[6][11].isWall = true;
+BOARD[7][11].isWall = true;
+BOARD[8][11].isWall = true;
+BOARD[9][11].isWall = true;
+BOARD[10][11].isWall = true;
+BOARD[11][11].isWall = true;
+BOARD[12][11].isWall = true;
+BOARD[13][11].isWall = true;
 
 class App extends React.Component {
   state = {
@@ -31,69 +39,60 @@ class App extends React.Component {
   };
 
   componentDidMount() {
-    this.setState({
-      queue: [{ x: 10, y: 10 }]
-    });
+    const queue = breadthFirstSearch(
+      this.state.board,
+
+      // start
+      this.state.board[START_COORDS.x][START_COORDS.y],
+
+      // end
+      this.state.board[END_COORDS.x][END_COORDS.y]
+    );
+
+    const shortestPath = getShortestPath(queue);
+
+    console.log(queue, shortestPath);
+    this.setState({ queue, shortestPath });
   }
 
   componentDidUpdate() {
-    const { visited, queue, board } = this.state;
+    const { board, queue, shortestPath } = this.state;
 
     if (queue.length > 0) {
-      const { x, y } = queue.shift();
+      // animate traversal
+      setTimeout(() => {
+        const { x, y } = queue.shift();
 
-      visited[x][y] = true;
+        board[x][y].visited = true;
 
-      const toTraverse = [];
+        this.setState({ board, queue });
+      }, 0);
+    } else if (shortestPath.length > 0) {
+      // animate shortest path
+      setTimeout(() => {
+        const { x, y } = shortestPath.shift();
 
-      if (x > 0 && !visited[x - 1][y] && board[x - 1][y] !== WALL) {
-        toTraverse.push({ x: x - 1, y });
-      }
+        board[x][y].isOnShortestPath = true;
 
-      if (y > 0 && !visited[x][y - 1] && board[x][y - 1] !== WALL) {
-        toTraverse.push({ x: x, y: y - 1 });
-      }
-
-      if (
-        x < board.length - 1 &&
-        !visited[x + 1][y] &&
-        board[x + 1][y] !== WALL
-      ) {
-        toTraverse.push({ x: x + 1, y });
-      }
-
-      if (
-        y < board[0].length - 1 &&
-        !visited[x][y + 1] &&
-        board[x][y + 1] !== WALL
-      ) {
-        toTraverse.push({ x: x, y: y + 1 });
-      }
-
-      if (toTraverse.length > 0 || queue.length > 0) {
-        requestAnimationFrame(() => {
-          this.setState({
-            visited,
-            queue: queue.concat(toTraverse)
-          });
-        }, 50);
-      }
+        this.setState({ board, shortestPath });
+      }, 0);
     }
   }
 
   render() {
-    const { board, visited } = this.state;
+    const { board } = this.state;
+
     return (
       <div className="App">
         <div className="board">
           {board.map((row, x) => (
-            <div key={`row: ${x}`}>
+            <div>
               {row.map((_, y) => (
-                <Node
-                  key={`node: ${x},${y}`}
-                  visited={visited[x][y]}
-                  value={board[x][y]}
-                ></Node>
+                <Cell
+                  node={board[x][y]}
+                  isStart={x === START_COORDS.x && y === START_COORDS.y}
+                  isEndNode={x === END_COORDS.x && y === END_COORDS.y}
+                />
               ))}
             </div>
           ))}
