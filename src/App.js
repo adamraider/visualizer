@@ -30,6 +30,24 @@ BOARD[10][11].wall = true;
 BOARD[11][11].wall = true;
 BOARD[12][11].wall = true;
 BOARD[13][11].wall = true;
+BOARD[5][4].wall = true;
+BOARD[6][4].wall = true;
+BOARD[7][4].wall = true;
+BOARD[8][4].wall = true;
+BOARD[9][4].wall = true;
+BOARD[10][4].wall = true;
+BOARD[11][4].wall = true;
+BOARD[13][4].wall = true;
+BOARD[5][4].wall = true;
+BOARD[5][5].wall = true;
+BOARD[5][6].wall = true;
+BOARD[5][7].wall = true;
+BOARD[5][8].wall = true;
+BOARD[5][9].wall = true;
+BOARD[5][10].wall = true;
+BOARD[5][11].wall = true;
+BOARD[5][12].wall = true;
+BOARD[5][13].wall = true;
 
 class App extends React.Component {
   state = {
@@ -61,8 +79,9 @@ class App extends React.Component {
       // animate traversal
       setTimeout(() => {
         const { x, y } = queue.shift();
+        const node = board[x][y];
 
-        board[x][y].renderVisited = true;
+        node.renderVisited = true;
         visited[x][y] = true;
 
         this.setState({ board, queue });
