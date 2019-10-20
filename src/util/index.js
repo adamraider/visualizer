@@ -1,9 +1,8 @@
 export function createNode({ ...args }) {
   return {
     ...args,
-    isWall: false,
-    isEndNode: false,
-    isStartNode: false
+    wall: false,
+    visited: false
   };
 }
 

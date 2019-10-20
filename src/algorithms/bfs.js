@@ -1,5 +1,3 @@
-import { newBoard } from '../util';
-
 export function getShortestPath(queue) {
   const path = [];
   const endNode = queue[queue.length - 1];
@@ -7,85 +5,60 @@ export function getShortestPath(queue) {
   path.push(endNode);
 
   let currentNode = endNode;
+  let count = 0;
 
-  while (currentNode.previousNode) {
+  while (currentNode.previousNode && count < 1000) {
     currentNode = currentNode.previousNode;
     path.push(currentNode);
+    count++;
   }
 
   return path.reverse();
 }
 
 export default function breadthFirstSearch(board, startNode, endNode) {
-  const visitedInOrder = [];
-
   const { x: endX, y: endY } = endNode;
-  const queue = [startNode];
 
-  const rowsCount = board.length;
-  const colsCount = board[0].length;
+  const traversed = [];
+  const queue = [];
+  const addToQueue = node => queue.push(node);
 
-  const visitedOrQueued = newBoard(rowsCount, colsCount, false);
+  addToQueue(startNode);
+  startNode.visited = true;
 
   while (queue.length > 0) {
     const node = queue.shift();
 
-    const { x, y } = node;
-    visitedInOrder.push({ ...node, previousNode: node });
+    traversed.push(node);
 
     // found the end node
-    if (x === endX && y === endY) return visitedInOrder;
+    if (node.x === endX && node.y === endY) return traversed;
 
-    visitedOrQueued[x][y] = { ...node };
-
-    if (x > 0 && !visitedOrQueued[x - 1][y] && !board[x - 1][y].isWall) {
-      const nextNode = {
-        ...board[x - 1][y],
-        previousNode: node
-      };
-
-      visitedOrQueued[x - 1][y] = true;
-      queue.push(nextNode);
-    }
-
-    if (y > 0 && !visitedOrQueued[x][y - 1] && !board[x][y - 1].isWall) {
-      const nextNode = {
-        ...board[x][y - 1],
-        previousNode: node
-      };
-
-      visitedOrQueued[x][y - 1] = true;
-      queue.push(nextNode);
-    }
-
-    if (
-      x < board.length - 1 &&
-      !visitedOrQueued[x + 1][y] &&
-      !board[x + 1][y].isWall
-    ) {
-      const nextNode = {
-        ...board[x + 1][y],
-        previousNode: node
-      };
-
-      visitedOrQueued[x + 1][y] = true;
-      queue.push(nextNode);
-    }
-
-    if (
-      y < board[0].length - 1 &&
-      !visitedOrQueued[x][y + 1] &&
-      !board[x][y + 1].isWall
-    ) {
-      const newNode = {
-        ...board[x][y + 1],
-        previousNode: node
-      };
-
-      visitedOrQueued[x][y + 1] = true;
-      queue.push(newNode);
-    }
+    getAdjacentNodes(board, node).forEach(addToQueue);
   }
 
-  return visitedInOrder;
+  return traversed;
+}
+
+function getAdjacentNodes(board, node) {
+  const { x, y } = node;
+  const toQueue = [];
+
+  function enqueue(x, y) {
+    const targetNode = board[x][y];
+
+    if (!targetNode.wall && !targetNode.visited) {
+      targetNode.previousNode = node;
+      toQueue.push(targetNode);
+    }
+
+    targetNode.visited = true;
+  }
+
+  if (x > 0) enqueue(x - 1, y);
+  if (y > 0) enqueue(x, y - 1);
+  if (x < board.length - 1) enqueue(x + 1, y);
+  if (y < board[0].length - 1) enqueue(x, y + 1);
+
+  return toQueue;
 }

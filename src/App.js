@@ -21,20 +21,21 @@ const END_COORDS = {
 const BOARD = newBoard(NUM_OF_ROWS, NUM_OF_COLS);
 const VISITED = newBoard(NUM_OF_ROWS, NUM_OF_COLS, false);
 
-BOARD[5][11].isWall = true;
-BOARD[6][11].isWall = true;
-BOARD[7][11].isWall = true;
-BOARD[8][11].isWall = true;
-BOARD[9][11].isWall = true;
-BOARD[10][11].isWall = true;
-BOARD[11][11].isWall = true;
-BOARD[12][11].isWall = true;
-BOARD[13][11].isWall = true;
+BOARD[5][11].wall = true;
+BOARD[6][11].wall = true;
+BOARD[7][11].wall = true;
+BOARD[8][11].wall = true;
+BOARD[9][11].wall = true;
+BOARD[10][11].wall = true;
+BOARD[11][11].wall = true;
+BOARD[12][11].wall = true;
+BOARD[13][11].wall = true;
 
 class App extends React.Component {
   state = {
     board: BOARD,
     visited: VISITED,
+    shortestPath: [],
     queue: []
   };
 
@@ -50,20 +51,19 @@ class App extends React.Component {
     );
 
     const shortestPath = getShortestPath(queue);
-
-    console.log(queue, shortestPath);
     this.setState({ queue, shortestPath });
   }
 
   componentDidUpdate() {
-    const { board, queue, shortestPath } = this.state;
+    const { board, queue, visited, shortestPath } = this.state;
 
     if (queue.length > 0) {
       // animate traversal
       setTimeout(() => {
         const { x, y } = queue.shift();
 
-        board[x][y].visited = true;
+        board[x][y].renderVisited = true;
+        visited[x][y] = true;
 
         this.setState({ board, queue });
       }, 0);
@@ -71,8 +71,9 @@ class App extends React.Component {
       // animate shortest path
       setTimeout(() => {
         const { x, y } = shortestPath.shift();
+        const node = board[x][y];
 
-        board[x][y].isOnShortestPath = true;
+        node.isOnShortestPath = true;
 
         this.setState({ board, shortestPath });
       }, 0);
@@ -86,14 +87,18 @@ class App extends React.Component {
       <div className="App">
         <div className="board">
           {board.map((row, x) => (
-            <div>
-              {row.map((_, y) => (
-                <Cell
-                  node={board[x][y]}
-                  isStart={x === START_COORDS.x && y === START_COORDS.y}
-                  isEndNode={x === END_COORDS.x && y === END_COORDS.y}
-                />
-              ))}
+            <div key={x} className="flex">
+              <div className={`row row--${x}`}>
+                {row.map((_, y) => (
+                  <Cell
+                    key={x + ',' + y}
+                    {...board[x][y]}
+                    renderVisited={this.state.visited[x][y]}
+                    isStart={x === START_COORDS.x && y === START_COORDS.y}
+                    isEndNode={x === END_COORDS.x && y === END_COORDS.y}
+                  />
+                ))}
+              </div>
             </div>
           ))}
         </div>

@@ -1,22 +1,26 @@
 import React from 'react';
 import cs from 'clsx';
 
-export default class Cell extends React.Component {
+export default class Cell extends React.PureComponent {
   render() {
-    const { node, isStart, isEndNode, ...props } = this.props;
+    const {
+      renderVisited,
+      wall,
+      isOnShortestPath,
+      isStart,
+      isEndNode
+    } = this.props;
 
     return (
-      <div {...props}>
-        <span
-          className={cs({
-            visited: node.visited,
-            wall: node.isWall,
-            end: isEndNode,
-            start: isStart,
-            'shortest-path': node.isOnShortestPath
-          })}
-        ></span>
-      </div>
+      <div
+        className={cs('cell', {
+          visited: renderVisited,
+          wall: wall,
+          end: isEndNode,
+          start: isStart,
+          'shortest-path': isOnShortestPath
+        })}
+      ></div>
     );
   }
 }
