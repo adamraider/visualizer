@@ -8,16 +8,6 @@ import { newBoard } from './util';
 const NUM_OF_ROWS = 20;
 const NUM_OF_COLS = 20;
 
-const START_COORDS = {
-  x: Math.floor(Math.random() * NUM_OF_ROWS),
-  y: Math.floor(Math.random() * NUM_OF_COLS)
-};
-
-const END_COORDS = {
-  x: Math.floor(Math.random() * NUM_OF_ROWS),
-  y: Math.floor(Math.random() * NUM_OF_COLS)
-};
-
 const BOARD = newBoard(NUM_OF_ROWS, NUM_OF_COLS);
 const VISITED = newBoard(NUM_OF_ROWS, NUM_OF_COLS, false);
 
@@ -49,6 +39,19 @@ BOARD[5][11].wall = true;
 BOARD[5][12].wall = true;
 BOARD[5][13].wall = true;
 
+const allNodes = BOARD.reduce((memo, row) => memo.concat(row), []);
+const freeNodes = allNodes.filter(node => !node.wall);
+
+const startNode = freeNodes.splice(
+  Math.floor(Math.random() * freeNodes.length),
+  1
+)[0];
+
+const endNode = freeNodes.splice(
+  Math.floor(Math.random() * freeNodes.length),
+  1
+)[0];
+
 class App extends React.Component {
   state = {
     board: BOARD,
@@ -62,10 +65,10 @@ class App extends React.Component {
       this.state.board,
 
       // start
-      this.state.board[START_COORDS.x][START_COORDS.y],
+      this.state.board[startNode.x][startNode.y],
 
       // end
-      this.state.board[END_COORDS.x][END_COORDS.y]
+      this.state.board[endNode.x][endNode.y]
     );
 
     const shortestPath = getShortestPath(queue);
@@ -113,8 +116,8 @@ class App extends React.Component {
                     key={x + ',' + y}
                     {...board[x][y]}
                     renderVisited={this.state.visited[x][y]}
-                    isStart={x === START_COORDS.x && y === START_COORDS.y}
-                    isEndNode={x === END_COORDS.x && y === END_COORDS.y}
+                    isStart={x === startNode.x && y === startNode.y}
+                    isEndNode={x === endNode.x && y === endNode.y}
                   />
                 ))}
               </div>
